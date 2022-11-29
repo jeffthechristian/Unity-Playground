@@ -2,33 +2,60 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DoorMechanic : MonoBehaviour {
-    public bool isOpen = false;
-    public bool inReach = false;
-    public GameObject Door;
-    public GameObject InteractionText;
+public class DoorMechanic : MonoBehaviour
+{
 
-    void OnTriggerEnter(Collider collision) {
-        if (collision.gameObject.tag == "Reach") {
+    public Animator door;
+    public GameObject openText;
+    public GameObject closeText;
+
+    private bool inReach;
+    private bool doorisOpen;
+    private bool doorisClosed;
+
+    void OnTriggerEnter(Collider other) {
+        if (other.gameObject.tag == "Reach" && doorisClosed) {
             inReach = true;
-            InteractionText.SetActive(true);
+            openText.SetActive(true);
+        }
+
+        if (other.gameObject.tag == "Reach" && doorisOpen) {
+            inReach = true;
+            closeText.SetActive(true);
         }
     }
 
-    void OnTriggerExit(Collider collision) {
+    void OnTriggerExit(Collider other) {
+        if (other.gameObject.tag == "Reach") {
             inReach = false;
-            InteractionText.SetActive(false);
+            openText.SetActive(false);
+            closeText.SetActive(false);
+        }
+    }
+
+    void Start() {
+        inReach = false;
+        doorisClosed = true;
+        doorisOpen = false;
+        closeText.SetActive(false);
+        openText.SetActive(false);
     }
 
     void Update() {
-        if (inReach == true && isOpen == false && Input.GetKeyDown(KeyCode.E)) {
-                Door.GetComponent<Animator>().Play("Open");
-                isOpen = true;
+        if (inReach && doorisClosed && Input.GetButtonDown("Interact")) {
+            door.SetBool("Open", true);
+            door.SetBool("Closed", false);
+            openText.SetActive(false);
+            doorisOpen = true;
+            doorisClosed = false;
         }
-        
-        if (inReach == true && isOpen == true && Input.GetKeyDown(KeyCode.E)) {
-                Door.GetComponent<Animator>().Play("Close");
-                isOpen = false;
+
+        else if (inReach && doorisOpen && Input.GetButtonDown("Interact")) {
+            door.SetBool("Open", false);
+            door.SetBool("Closed", true);
+            closeText.SetActive(false);
+            doorisClosed = true;
+            doorisOpen = false;
         }
     }
 }
